@@ -3,12 +3,13 @@ interface QuizActions {
     fun showResult()
 }
 
+
 abstract class QuizBase {
     protected var score: Int = 0
     abstract fun loadQuestions()
 }
 
-open class Question(
+ class Question(
     val questionText: String,
     val options: List<String>,
     val correctAnswer: Int
@@ -16,7 +17,9 @@ open class Question(
 
 class OnlineQuiz : QuizBase(), QuizActions {
 
-    private val questions = mutableListOf<Question>()
+    val questions = arrayListOf<Question>()
+    val userAnswers = arrayListOf<Int>()
+    var userName = ""
 
     override fun loadQuestions() {
         questions.add(
@@ -37,7 +40,7 @@ class OnlineQuiz : QuizBase(), QuizActions {
 
         questions.add(
             Question(
-                "3. Which loop is guaranteed to run at least once?",
+                "3. Which loop runs at least once?",
                 listOf("for", "while", "do-while", "foreach"),
                 3
             )
@@ -45,23 +48,32 @@ class OnlineQuiz : QuizBase(), QuizActions {
     }
 
     override fun startQuiz() {
-        loadQuestions()
 
-        println("===== ONLINE QUIZ SYSTEM =====")
-        println("Enter your answers (1-4)\n")
+        print("Enter your name: ")
+        userName = readln().toString()
+
+        println("\nHi $userName")
+        println("Welcome to the quiz")
+        println("Quiz is starting...\n")
+
+        loadQuestions()
 
         for (q in questions) {
             println(q.questionText)
+
             for ((index, option) in q.options.withIndex()) {
                 println("${index + 1}. $option")
             }
 
-            print("Your answer: ")
-            val userAnswer = readLine()!!.toInt()
+            print("Enter your answer: ")
+            val ans = readln().toInt()
 
-            if (userAnswer == q.correctAnswer) {
+            userAnswers.add(ans)
+
+            if (ans == q.correctAnswer) {
                 score++
             }
+
             println()
         }
 
@@ -69,21 +81,43 @@ class OnlineQuiz : QuizBase(), QuizActions {
     }
 
     override fun showResult() {
-        println("===== QUIZ RESULT =====")
-        println("Total Questions: ${questions.size}")
-        println("Correct Answers: $score")
-        println("Score: $score/${questions.size}")
+
+        println("------------ RESULT ------------")
+        println("Name  : $userName")
+        println("Score : $score / ${questions.size}")
 
         if (score >= 2) {
-            println("Result: PASS!!! ")
+            println("Status: Pass")
         } else {
-            println("Result: FAIL...")
+            println("Status: Fail")
         }
+
+        println("\n------ Answer Review ------")
+
+        for (i in questions.indices) {
+
+            val q = questions[i]
+            val userAns = userAnswers[i]
+
+            println(q.questionText)
+            println("Your answer    : ${q.options[userAns - 1]}")
+            println("Correct answer : ${q.options[q.correctAnswer - 1]}")
+
+            if (userAns == q.correctAnswer) {
+                println("Result: Correct")
+            } else {
+                println("Result: Wrong")
+            }
+
+            println("---------------------------")
+        }
+
+        println("Quiz completed. Thank you.")
     }
 }
 
-fun main() {
-    val quiz = OnlineQuiz()
-    quiz.startQuiz()
-}
 
+fun main() {
+    val quizObj = OnlineQuiz()
+    quizObj.startQuiz()
+}
